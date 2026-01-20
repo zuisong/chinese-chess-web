@@ -1,13 +1,39 @@
 import type { FunctionalComponent } from "preact";
+import { useStore } from "@nanostores/preact";
 import { useEffect, useState } from "preact/hooks";
 import type MainScene from "../game/MainScene";
 import { gameInstance, scores, showScore } from "../store";
+import { locale, type Locale } from "../i18n";
 import RestartModal from "./RestartModal";
 import SettingsModal from "./SettingsModal";
+
+const translations = {
+  "zh-CN": {
+    settings: "设置",
+    restart: "重开",
+    undo: "悔棋",
+    hint: "提示",
+  },
+  "zh-TW": {
+    settings: "設置",
+    restart: "重開",
+    undo: "悔棋",
+    hint: "提示",
+  },
+  ja: {
+    settings: "設定",
+    restart: "再開",
+    undo: "待った",
+    hint: "ヒント",
+  },
+};
 
 const UI: FunctionalComponent = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isRestartOpen, setIsRestartOpen] = useState(false);
+  const currentLocale = useStore(locale);
+
+  const t = translations[currentLocale];
 
   // Derived state for scene actions
   const scene = gameInstance.value
@@ -29,16 +55,16 @@ const UI: FunctionalComponent = () => {
       {/* Control Buttons - Grid Layout */}
       <div className="mb-[15px] grid grid-cols-4 gap-2">
         <button type="button" onClick={() => setIsSettingsOpen(true)} className={buttonClass}>
-          设置
+          {t.settings}
         </button>
         <button type="button" onClick={() => setIsRestartOpen(true)} className={buttonClass}>
-          重开
+          {t.restart}
         </button>
         <button type="button" onClick={() => scene?.retract()} className={buttonClass}>
-          悔棋
+          {t.undo}
         </button>
         <button type="button" onClick={() => scene?.recommend()} className={buttonClass}>
-          提示
+          {t.hint}
         </button>
       </div>
 

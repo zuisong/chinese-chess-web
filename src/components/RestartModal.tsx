@@ -1,8 +1,46 @@
 import type { FunctionalComponent } from "preact";
+import { useStore } from "@nanostores/preact";
 import { useEffect, useState } from "preact/hooks";
 import type MainScene from "../game/MainScene";
-import { handicap, moveMode } from "../store";
-import type { Handicap, MoveMode } from "../types/ui.types";
+import { difficulty, handicap, moveMode } from "../store";
+import { locale } from "../i18n";
+import type { Difficulty, Handicap, MoveMode } from "../types/ui.types";
+
+const translations = {
+  "zh-CN": {
+    title: "重新开始",
+    difficulty: "难度",
+    difficultyLevels: ["入门", "业余", "专业"],
+    firstMove: "先手",
+    firstMoveOptions: ["玩家先手", "电脑先手", "双人对战"],
+    handicap: "让子",
+    handicapOptions: ["无", "让左马", "让双马", "让九子"],
+    cancel: "取消",
+    confirm: "确定",
+  },
+  "zh-TW": {
+    title: "重新開始",
+    difficulty: "難度",
+    difficultyLevels: ["入門", "業餘", "專業"],
+    firstMove: "先手",
+    firstMoveOptions: ["玩家先手", "電腦先手", "雙人對戰"],
+    handicap: "讓子",
+    handicapOptions: ["無", "讓左馬", "讓雙馬", "讓九子"],
+    cancel: "取消",
+    confirm: "確定",
+  },
+  ja: {
+    title: "再開",
+    difficulty: "難易度",
+    difficultyLevels: ["初級", "中級", "上級"],
+    firstMove: "先手",
+    firstMoveOptions: ["プレイヤー先手", "COM先手", "対人戦"],
+    handicap: "ハンデ",
+    handicapOptions: ["なし", "左馬落ち", "両馬落ち", "九子落ち"],
+    cancel: "キャンセル",
+    confirm: "確定",
+  },
+};
 
 interface RestartModalProps {
   isOpen: boolean;
@@ -13,16 +51,22 @@ interface RestartModalProps {
 const RestartModal: FunctionalComponent<RestartModalProps> = ({ isOpen, onClose, scene }) => {
   const [localMoveMode, setLocalMoveMode] = useState<MoveMode>(0);
   const [localHandicap, setLocalHandicap] = useState<Handicap>(0);
+  const [localDifficulty, setLocalDifficulty] = useState<Difficulty>(2);
+
+  const currentLocale = useStore(locale);
+  const t = translations[currentLocale];
 
   useEffect(() => {
     if (isOpen) {
       setLocalMoveMode(moveMode.value as MoveMode);
       setLocalHandicap(handicap.value as Handicap);
+      setLocalDifficulty(difficulty.value as Difficulty);
     }
   }, [isOpen]);
 
   const handleConfirm = () => {
     if (scene) {
+      scene.setDifficulty(localDifficulty);
       scene.setMoveMode(localMoveMode);
       scene.setHandicap(localHandicap);
       scene.restart();
@@ -40,25 +84,35 @@ const RestartModal: FunctionalComponent<RestartModalProps> = ({ isOpen, onClose,
   return (
     <div className={overlayClass}>
       <div className={contentClass}>
-        <h2 className="m-0 text-center">重新开始</h2>
+        <h2 className="m-0 text-center">{t.title}</h2>
 
         <div>
-          <label className="font-bold">先手:</label>
+          <label className="font-bold">{t.difficulty}:</label>
           <button
-            onClick={() => setLocalMoveMode(((localMoveMode + 1) % 3) as MoveMode)}
+            onClick={() => setLocalDifficulty(((localDifficulty + 1) % 3) as Difficulty)}
             className="mt-[5px] w-full p-2.5 rounded-[4px] bg-[#555] text-white border-none text-base cursor-pointer text-left"
           >
-            {["玩家先手", "电脑先手", "双人对战"][localMoveMode]}
+            {t.difficultyLevels[localDifficulty]}
           </button>
         </div>
 
         <div>
-          <label className="font-bold">让子:</label>
+          <label className="font-bold">{t.firstMove}:</label>
+          <button
+            onClick={() => setLocalMoveMode(((localMoveMode + 1) % 3) as MoveMode)}
+            className="mt-[5px] w-full p-2.5 rounded-[4px] bg-[#555] text-white border-none text-base cursor-pointer text-left"
+          >
+            {t.firstMoveOptions[localMoveMode]}
+          </button>
+        </div>
+
+        <div>
+          <label className="font-bold">{t.handicap}:</label>
           <button
             onClick={() => setLocalHandicap(((localHandicap + 1) % 4) as Handicap)}
             className="mt-[5px] w-full p-2.5 rounded-[4px] bg-[#555] text-white border-none text-base cursor-pointer text-left"
           >
-            {["无", "让左马", "让双马", "让九子"][localHandicap]}
+            {t.handicapOptions[localHandicap]}
           </button>
         </div>
 
@@ -67,13 +121,13 @@ const RestartModal: FunctionalComponent<RestartModalProps> = ({ isOpen, onClose,
             onClick={onClose}
             className="px-[30px] py-2.5 cursor-pointer text-white border-none rounded-[5px] text-base bg-[#6B7280]"
           >
-            取消
+            {t.cancel}
           </button>
           <button
             onClick={handleConfirm}
             className="px-[30px] py-2.5 cursor-pointer text-white border-none rounded-[5px] text-base bg-[#10B981]"
           >
-            确定
+            {t.confirm}
           </button>
         </div>
       </div>
