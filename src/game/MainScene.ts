@@ -288,8 +288,8 @@ export default class MainScene extends Phaser.Scene {
             this.computerMove() ? this.soundManager.playMove2() : this.soundManager.playMove();
         }
 
-        this.events.emit('update-score', this.engine.getScores());
-        this.events.emit('update-moves', this.getMoveList());
+        this.events.emit(EVENTS.UPDATE_SCORE, this.engine.getScores());
+        this.events.emit(EVENTS.UPDATE_MOVES, this.getMoveList());
 
         this.response();
     }
@@ -351,8 +351,8 @@ export default class MainScene extends Phaser.Scene {
             }
 
             this.flushBoard();
-            this.events.emit('update-score', this.engine.getScores());
-            this.events.emit('update-moves', this.getMoveList());
+            this.events.emit(EVENTS.UPDATE_SCORE, this.engine.getScores());
+            this.events.emit(EVENTS.UPDATE_MOVES, this.getMoveList());
         }
     }
 
@@ -481,8 +481,8 @@ export default class MainScene extends Phaser.Scene {
             this.checkGameState();
         }
 
-        this.events.emit('update-score', this.engine.getScores());
-        this.events.emit('update-moves', this.getMoveList());
+        this.events.emit(EVENTS.UPDATE_SCORE, this.engine.getScores());
+        this.events.emit(EVENTS.UPDATE_MOVES, this.getMoveList());
         this.saveGame();
     }
 
