@@ -1,12 +1,9 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ESNext"
-    ],
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "jsx": "react-jsx",
+    "jsxImportSource": "preact",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -16,13 +13,7 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": [
-      "vitest/globals",
-      "@testing-library/jest-dom/vitest",
-      "node",
-    ],
+    "types": ["vitest/globals", "@testing-library/jest-dom/vitest", "node"]
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }

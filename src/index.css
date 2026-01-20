@@ -1,22 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --primary-color: #3B82F6;
+  --primary-color: #3b82f6;
   /* Blue 500 */
-  --primary-color-dark: #2563EB;
+  --primary-color-dark: #2563eb;
   /* Blue 600 */
-  --text-color-primary: #1F2937;
+  --text-color-primary: #1f2937;
   /* Gray 800 */
-  --text-color-secondary: #6B7280;
+  --text-color-secondary: #6b7280;
   /* Gray 500 */
-  --background-color: #F3F4F6;
+  --background-color: #f3f4f6;
   /* Gray 100 */
-  --surface-color: #FFFFFF;
-  --border-color: #D1D5DB;
+  --surface-color: #ffffff;
+  --border-color: #d1d5db;
   /* Gray 300 */
   --shadow-color-light: rgba(0, 0, 0, 0.05);
   --shadow-color-medium: rgba(0, 0, 0, 0.1);
-  --font-family: 'Inter', sans-serif;
+  --font-family: "Inter", sans-serif;
   --spacing-unit: 8px;
 }
 
@@ -33,5 +33,8 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: calc(var(--spacing-unit) * 2 + env(safe-area-inset-top, 0px)) calc(var(--spacing-unit) * 2 + env(safe-area-inset-right, 0px)) calc(var(--spacing-unit) * 2 + env(safe-area-inset-bottom, 0px)) calc(var(--spacing-unit) * 2 + env(safe-area-inset-left, 0px));
+  padding: calc(var(--spacing-unit) * 2 + env(safe-area-inset-top, 0px))
+    calc(var(--spacing-unit) * 2 + env(safe-area-inset-right, 0px))
+    calc(var(--spacing-unit) * 2 + env(safe-area-inset-bottom, 0px))
+    calc(var(--spacing-unit) * 2 + env(safe-area-inset-left, 0px));
 }

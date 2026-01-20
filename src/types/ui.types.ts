@@ -30,13 +30,13 @@ export type Difficulty = 0 | 1 | 2;
  * 游戏状态 (用于保存/加载)
  */
 export interface GameState {
-    fen: string;
-    initialFen: string;
-    moves: string[];
-    handicap: Handicap;
-    moveMode: MoveMode;
-    difficulty: number;
-    soundEnabled: boolean;
-    animated: boolean;
-    showScore: boolean;
+  fen: string;
+  initialFen: string;
+  moves: string[];
+  handicap: Handicap;
+  moveMode: MoveMode;
+  difficulty: Difficulty;
+  soundEnabled: boolean;
+  animated: boolean;
+  showScore: boolean;
 }
