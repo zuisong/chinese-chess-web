@@ -1,8 +1,7 @@
-import type { FunctionalComponent } from "preact";
-import { useStore } from "@nanostores/preact";
+import { type Component, Show } from "solid-js";
 import type MainScene from "../game/MainScene";
+import { locale, setLocale, type Locale } from "../i18n";
 import { animated, showScore, soundEnabled } from "../store";
-import { locale, type Locale } from "../i18n";
 
 const translations = {
   "zh-CN": {
@@ -52,11 +51,8 @@ interface SettingsModalProps {
   scene: MainScene | null;
 }
 
-const SettingsModal: FunctionalComponent<SettingsModalProps> = ({ isOpen, onClose, scene }) => {
-  if (!isOpen) return null;
-
-  const currentLocale = useStore(locale);
-  const t = translations[currentLocale];
+const SettingsModal: Component<SettingsModalProps> = (props) => {
+  const t = () => translations[locale()];
 
   const overlayClass =
     "fixed top-0 left-0 w-full h-full bg-black/70 flex justify-center items-center z-[1000]";
@@ -66,73 +62,73 @@ const SettingsModal: FunctionalComponent<SettingsModalProps> = ({ isOpen, onClos
   const checkboxClass = "w-5 h-5";
 
   return (
-    <div className={overlayClass}>
-      <div className={contentClass}>
-        <h2 className="m-0 text-center">{t.title}</h2>
+    <Show when={props.isOpen}>
+      <div class={overlayClass}>
+        <div class={contentClass}>
+          <h2 class="m-0 text-center">{t().title}</h2>
 
-        <div>
-          <label className="font-bold">{t.language}:</label>
-          <button
-            type="button"
-            onClick={() => {
-              const locales: Locale[] = ["zh-CN", "zh-TW", "ja"];
-              const currentIndex = locales.indexOf(currentLocale);
-              const nextLocale = locales[(currentIndex + 1) % locales.length];
-              locale.set(nextLocale);
-            }}
-            className="mt-[5px] w-full p-2.5 rounded-[4px] bg-[#555] text-white border-none text-base cursor-pointer text-left"
-          >
-            {t.languages[currentLocale]}
-          </button>
-        </div>
+          <div>
+            <label class="font-bold">{t().language}:</label>
+            <button
+              onClick={() => {
+                const locales: Locale[] = ["zh-CN", "zh-TW", "ja"];
+                const currentIndex = locales.indexOf(locale());
+                const nextLocale = locales[(currentIndex + 1) % locales.length];
+                setLocale(nextLocale);
+              }}
+              class="mt-[5px] w-full p-2.5 rounded-[4px] bg-[#555] text-white border-none text-base cursor-pointer text-left"
+            >
+              {t().languages[locale()]}
+            </button>
+          </div>
 
-        <div>
-          <label className={checkboxLabelClass}>
-            <input
-              type="checkbox"
-              checked={soundEnabled.value}
-              onChange={(e) => scene?.setSound(e.currentTarget.checked)}
-              className={checkboxClass}
-            />
-            {t.sound}
-          </label>
-        </div>
+          <div>
+            <label class={checkboxLabelClass}>
+              <input
+                type="checkbox"
+                checked={soundEnabled()}
+                onChange={(e) => props.scene?.setSound(e.currentTarget.checked)}
+                class={checkboxClass}
+              />
+              {t().sound}
+            </label>
+          </div>
 
-        <div>
-          <label className={checkboxLabelClass}>
-            <input
-              type="checkbox"
-              checked={animated.value}
-              onChange={(e) => scene?.setAnimated(e.currentTarget.checked)}
-              className={checkboxClass}
-            />
-            {t.animation}
-          </label>
-        </div>
+          <div>
+            <label class={checkboxLabelClass}>
+              <input
+                type="checkbox"
+                checked={animated()}
+                onChange={(e) => props.scene?.setAnimated(e.currentTarget.checked)}
+                class={checkboxClass}
+              />
+              {t().animation}
+            </label>
+          </div>
 
-        <div>
-          <label className={checkboxLabelClass}>
-            <input
-              type="checkbox"
-              checked={showScore.value}
-              onChange={(e) => scene?.setShowScore(e.currentTarget.checked)}
-              className={checkboxClass}
-            />
-            {t.showScore}
-          </label>
-        </div>
+          <div>
+            <label class={checkboxLabelClass}>
+              <input
+                type="checkbox"
+                checked={showScore()}
+                onChange={(e) => props.scene?.setShowScore(e.currentTarget.checked)}
+                class={checkboxClass}
+              />
+              {t().showScore}
+            </label>
+          </div>
 
-        <div className="flex justify-center mt-2.5">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-[30px] py-2.5 cursor-pointer bg-[#10B981] text-white border-none rounded-[5px] text-base"
-          >
-            {t.close}
-          </button>
+          <div class="flex justify-center mt-2.5">
+            <button
+              onClick={props.onClose}
+              class="px-[30px] py-2.5 cursor-pointer bg-[#10B981] text-white border-none rounded-[5px] text-base"
+            >
+              {t().close}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </Show>
   );
 };
 

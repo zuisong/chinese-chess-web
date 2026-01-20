@@ -1,41 +1,48 @@
 import Phaser from "phaser";
-import type { FunctionalComponent } from "preact";
-import { useEffect, useRef } from "preact/hooks";
+import { type Component, onCleanup, onMount } from "solid-js";
 import MainScene from "../game/MainScene";
-import { gameInstance } from "../store";
+import { setGameInstance } from "../store";
 
-const Game: FunctionalComponent = () => {
-  const gameRef = useRef<HTMLDivElement>(null);
+const Game: Component = () => {
+  let gameRef: HTMLDivElement | undefined;
 
-  useEffect(() => {
-    if (!gameRef.current) return;
+  onMount(() => {
+    if (!gameRef) return;
 
     const config: Phaser.Types.Core.GameConfig = {
       type: Phaser.AUTO,
-      width: 521, // Total Width Horizontal from constants
+      width: 521, // Board Width from constants
       height: 577, // Board Height from constants
-      parent: gameRef.current,
+      parent: gameRef,
+      dom: {
+        createContainer: true,
+      },
       scene: [MainScene],
       scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
       },
-      backgroundColor: "#333333",
-      dom: {
-        createContainer: true,
+      transparent: true,
+      audio: {
+        noAudio: false,
+      },
+      input: {
+        keyboard: true,
+        mouse: true,
+        touch: true,
       },
     };
 
     const game = new Phaser.Game(config);
-    gameInstance.value = game;
+    setGameInstance(game);
 
-    return () => {
+    onCleanup(() => {
       game.destroy(true);
-      gameInstance.value = null;
-    };
-  }, []);
+      setGameInstance(null);
+    });
+  });
 
-  return <div ref={gameRef} className="w-full h-full max-w-full max-h-full relative" />;
+  return <div ref={gameRef} class="w-full h-full max-w-full max-h-full relative" />;
 };
 
 export default Game;

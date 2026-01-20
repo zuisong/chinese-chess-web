@@ -17,6 +17,14 @@ import {
   handicap,
   moveMode,
   scores,
+  setAnimated,
+  setDifficulty,
+  setHandicap,
+  setMainScene,
+  setMoveMode,
+  setScores,
+  setShowScore,
+  setSoundEnabled,
   showScore,
   soundEnabled,
 } from "../store";
@@ -66,6 +74,12 @@ export default class MainScene extends Phaser.Scene {
       .setOrigin(0, 0)
       .setVisible(false)
       .setDepth(5);
+
+    // Register scene instance to store
+    setMainScene(() => this);
+    this.events.on(Phaser.Scenes.Events.DESTROY, () => {
+      setMainScene(null);
+    });
 
     // Generate Dot Texture
     const graphics = this.make.graphics({ x: 0, y: 0 });
@@ -210,7 +224,7 @@ export default class MainScene extends Phaser.Scene {
 
     piece.setDepth(100); // Bring to top
 
-    if (!animated.value) {
+    if (!animated()) {
       piece.setPosition(targetX, targetY);
       piece.setDepth(10);
       return Promise.resolve();
@@ -280,7 +294,7 @@ export default class MainScene extends Phaser.Scene {
       this.computerMove() ? this.soundManager.playMove2() : this.soundManager.playMove();
     }
 
-    scores.value = this.engine.getScores();
+    setScores(this.engine.getScores());
     this.response();
   }
 
@@ -326,18 +340,18 @@ export default class MainScene extends Phaser.Scene {
       // Always undo at least one move
       this.engine.undoInternalMove();
 
-      if (moveMode.value !== 2 && this.engine.getHistoryLength() > 1) {
+      if (moveMode() !== 2 && this.engine.getHistoryLength() > 1) {
         this.engine.undoInternalMove();
       }
 
       this.flushBoard();
-      scores.value = this.engine.getScores();
+      setScores(this.engine.getScores());
       this.saveGame();
     }
   }
 
   public setAnimated(enabled: boolean) {
-    animated.value = enabled;
+    setAnimated(enabled);
     this.saveGame();
   }
 
@@ -385,30 +399,30 @@ export default class MainScene extends Phaser.Scene {
 
   public setSound(enabled: boolean) {
     this.soundManager.setEnabled(enabled);
-    soundEnabled.value = enabled;
+    setSoundEnabled(enabled);
     this.saveGame();
   }
 
   public setDifficulty(level: Difficulty) {
     this.gameState.setDifficulty(level);
-    difficulty.value = level;
+    setDifficulty(level);
     this.saveGame();
   }
 
   public setMoveMode(mode: MoveMode) {
     this.gameState.setMoveMode(mode);
-    moveMode.value = mode;
+    setMoveMode(mode);
     this.saveGame();
   }
 
   public setHandicap(val: Handicap) {
     this.gameState.setHandicap(val);
-    handicap.value = val;
+    setHandicap(val);
     this.saveGame();
   }
 
   public setShowScore(show: boolean) {
-    showScore.value = show;
+    setShowScore(show);
     this.saveGame();
   }
 
@@ -416,7 +430,7 @@ export default class MainScene extends Phaser.Scene {
 
   public restart() {
     // Apply Handicap
-    const fen = this.STARTUP_FEN[handicap.value] || this.STARTUP_FEN[0];
+    const fen = this.STARTUP_FEN[handicap()] || this.STARTUP_FEN[0];
     this.initialFen = fen;
     this.engine.loadFen(fen);
 
@@ -425,20 +439,20 @@ export default class MainScene extends Phaser.Scene {
     this.gameState.setBusy(false);
 
     // Handle Move Mode (Computer First)
-    if (moveMode.value === 1) {
+    if (moveMode() === 1) {
       this.response();
     } else {
       this.checkGameState();
     }
 
-    scores.value = this.engine.getScores();
+    setScores(this.engine.getScores());
     this.saveGame();
   }
 
   computerMove() {
     let computerSide = 1; // Default Black
-    if (moveMode.value === 1) computerSide = 0; // Computer is Red
-    if (moveMode.value === 2) return false; // No Computer
+    if (moveMode() === 1) computerSide = 0; // Computer is Red
+    if (moveMode() === 2) return false; // No Computer
 
     return this.engine.sdPlayer === computerSide;
   }
@@ -447,15 +461,15 @@ export default class MainScene extends Phaser.Scene {
     const gameState = this.storageManager.load();
     if (gameState) {
       // Restore settings to signals
-      if (gameState.handicap !== undefined) handicap.value = gameState.handicap;
-      if (gameState.moveMode !== undefined) moveMode.value = gameState.moveMode;
-      if (gameState.difficulty !== undefined) difficulty.value = gameState.difficulty;
+      if (gameState.handicap !== undefined) setHandicap(gameState.handicap);
+      if (gameState.moveMode !== undefined) setMoveMode(gameState.moveMode);
+      if (gameState.difficulty !== undefined) setDifficulty(gameState.difficulty);
       if (gameState.soundEnabled !== undefined) {
-        soundEnabled.value = gameState.soundEnabled;
+        setSoundEnabled(gameState.soundEnabled);
         this.soundManager.setEnabled(gameState.soundEnabled);
       }
-      if (gameState.animated !== undefined) animated.value = gameState.animated;
-      if (gameState.showScore !== undefined) showScore.value = gameState.showScore;
+      if (gameState.animated !== undefined) setAnimated(gameState.animated);
+      if (gameState.showScore !== undefined) setShowScore(gameState.showScore);
 
       // Restore Game
       if (gameState.initialFen && gameState.moves) {
@@ -476,7 +490,7 @@ export default class MainScene extends Phaser.Scene {
       this.createPieces();
       this.flushBoard();
       this.checkGameState();
-      scores.value = this.engine.getScores();
+      setScores(this.engine.getScores());
     } else {
       // No save, start fresh
       this.restart();
@@ -493,12 +507,12 @@ export default class MainScene extends Phaser.Scene {
       fen: this.engine.getFen(),
       initialFen: this.initialFen || this.engine.getFen(),
       moves: moves,
-      handicap: handicap.value,
-      moveMode: moveMode.value,
-      difficulty: difficulty.value,
-      soundEnabled: soundEnabled.value,
-      animated: animated.value,
-      showScore: showScore.value,
+      handicap: handicap(),
+      moveMode: moveMode(),
+      difficulty: difficulty(),
+      soundEnabled: soundEnabled(),
+      animated: animated(),
+      showScore: showScore(),
     };
     this.storageManager.save(gameState);
   }

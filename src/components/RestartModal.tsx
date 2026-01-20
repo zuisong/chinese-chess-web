@@ -1,9 +1,7 @@
-import type { FunctionalComponent } from "preact";
-import { useStore } from "@nanostores/preact";
-import { useEffect, useState } from "preact/hooks";
+import { type Component, Show, createEffect, createSignal } from "solid-js";
 import type MainScene from "../game/MainScene";
-import { difficulty, handicap, moveMode } from "../store";
 import { locale } from "../i18n";
+import { difficulty, handicap, moveMode } from "../store";
 import type { Difficulty, Handicap, MoveMode } from "../types/ui.types";
 
 const translations = {
@@ -48,33 +46,32 @@ interface RestartModalProps {
   scene: MainScene | null;
 }
 
-const RestartModal: FunctionalComponent<RestartModalProps> = ({ isOpen, onClose, scene }) => {
-  const [localMoveMode, setLocalMoveMode] = useState<MoveMode>(0);
-  const [localHandicap, setLocalHandicap] = useState<Handicap>(0);
-  const [localDifficulty, setLocalDifficulty] = useState<Difficulty>(2);
+const RestartModal: Component<RestartModalProps> = (props) => {
+  const [localMoveMode, setLocalMoveMode] = createSignal<MoveMode>(0);
+  const [localHandicap, setLocalHandicap] = createSignal<Handicap>(0);
+  const [localDifficulty, setLocalDifficulty] = createSignal<Difficulty>(2);
 
-  const currentLocale = useStore(locale);
-  const t = translations[currentLocale];
+  // Derived translation helper
+  const t = () => translations[locale()];
 
-  useEffect(() => {
-    if (isOpen) {
-      setLocalMoveMode(moveMode.value as MoveMode);
-      setLocalHandicap(handicap.value as Handicap);
-      setLocalDifficulty(difficulty.value as Difficulty);
+  // Update local state when modal opens
+  createEffect(() => {
+    if (props.isOpen) {
+      setLocalMoveMode(moveMode());
+      setLocalHandicap(handicap());
+      setLocalDifficulty(difficulty());
     }
-  }, [isOpen]);
+  });
 
   const handleConfirm = () => {
-    if (scene) {
-      scene.setDifficulty(localDifficulty);
-      scene.setMoveMode(localMoveMode);
-      scene.setHandicap(localHandicap);
-      scene.restart();
+    if (props.scene) {
+      props.scene.setDifficulty(localDifficulty());
+      props.scene.setMoveMode(localMoveMode());
+      props.scene.setHandicap(localHandicap());
+      props.scene.restart();
     }
-    onClose();
+    props.onClose();
   };
-
-  if (!isOpen) return null;
 
   const overlayClass =
     "fixed top-0 left-0 w-full h-full bg-black/70 flex justify-center items-center z-[1000]";
@@ -82,56 +79,58 @@ const RestartModal: FunctionalComponent<RestartModalProps> = ({ isOpen, onClose,
     "bg-[#333] p-5 rounded-[10px] text-white w-[90%] max-w-[400px] flex flex-col gap-[15px]";
 
   return (
-    <div className={overlayClass}>
-      <div className={contentClass}>
-        <h2 className="m-0 text-center">{t.title}</h2>
+    <Show when={props.isOpen}>
+      <div class={overlayClass}>
+        <div class={contentClass}>
+          <h2 class="m-0 text-center">{t().title}</h2>
 
-        <div>
-          <label className="font-bold">{t.difficulty}:</label>
-          <button
-            onClick={() => setLocalDifficulty(((localDifficulty + 1) % 3) as Difficulty)}
-            className="mt-[5px] w-full p-2.5 rounded-[4px] bg-[#555] text-white border-none text-base cursor-pointer text-left"
-          >
-            {t.difficultyLevels[localDifficulty]}
-          </button>
-        </div>
+          <div>
+            <label class="font-bold">{t().difficulty}:</label>
+            <button
+              onClick={() => setLocalDifficulty(((localDifficulty() + 1) % 3) as Difficulty)}
+              class="mt-[5px] w-full p-2.5 rounded-[4px] bg-[#555] text-white border-none text-base cursor-pointer text-left"
+            >
+              {t().difficultyLevels[localDifficulty()]}
+            </button>
+          </div>
 
-        <div>
-          <label className="font-bold">{t.firstMove}:</label>
-          <button
-            onClick={() => setLocalMoveMode(((localMoveMode + 1) % 3) as MoveMode)}
-            className="mt-[5px] w-full p-2.5 rounded-[4px] bg-[#555] text-white border-none text-base cursor-pointer text-left"
-          >
-            {t.firstMoveOptions[localMoveMode]}
-          </button>
-        </div>
+          <div>
+            <label class="font-bold">{t().firstMove}:</label>
+            <button
+              onClick={() => setLocalMoveMode(((localMoveMode() + 1) % 3) as MoveMode)}
+              class="mt-[5px] w-full p-2.5 rounded-[4px] bg-[#555] text-white border-none text-base cursor-pointer text-left"
+            >
+              {t().firstMoveOptions[localMoveMode()]}
+            </button>
+          </div>
 
-        <div>
-          <label className="font-bold">{t.handicap}:</label>
-          <button
-            onClick={() => setLocalHandicap(((localHandicap + 1) % 4) as Handicap)}
-            className="mt-[5px] w-full p-2.5 rounded-[4px] bg-[#555] text-white border-none text-base cursor-pointer text-left"
-          >
-            {t.handicapOptions[localHandicap]}
-          </button>
-        </div>
+          <div>
+            <label class="font-bold">{t().handicap}:</label>
+            <button
+              onClick={() => setLocalHandicap(((localHandicap() + 1) % 4) as Handicap)}
+              class="mt-[5px] w-full p-2.5 rounded-[4px] bg-[#555] text-white border-none text-base cursor-pointer text-left"
+            >
+              {t().handicapOptions[localHandicap()]}
+            </button>
+          </div>
 
-        <div className="flex justify-between mt-2.5">
-          <button
-            onClick={onClose}
-            className="px-[30px] py-2.5 cursor-pointer text-white border-none rounded-[5px] text-base bg-[#6B7280]"
-          >
-            {t.cancel}
-          </button>
-          <button
-            onClick={handleConfirm}
-            className="px-[30px] py-2.5 cursor-pointer text-white border-none rounded-[5px] text-base bg-[#10B981]"
-          >
-            {t.confirm}
-          </button>
+          <div class="flex justify-between mt-2.5">
+            <button
+              onClick={props.onClose}
+              class="px-[30px] py-2.5 cursor-pointer text-white border-none rounded-[5px] text-base bg-[#6B7280]"
+            >
+              {t().cancel}
+            </button>
+            <button
+              onClick={handleConfirm}
+              class="px-[30px] py-2.5 cursor-pointer text-white border-none rounded-[5px] text-base bg-[#10B981]"
+            >
+              {t().confirm}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </Show>
   );
 };
 

@@ -1,13 +1,13 @@
 /// <reference types="vitest/config" />
 
-import preact from "@preact/preset-vite";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
+import solid from "vite-plugin-solid";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   base: "./",
-  plugins: [preact(), tailwindcss()],
+  plugins: [solid(), tailwindcss()],
   build: {
     outDir: "docs",
   },
