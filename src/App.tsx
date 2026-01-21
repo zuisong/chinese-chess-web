@@ -4,11 +4,11 @@ import UI from "./components/UI";
 
 const App: Component = () => {
   return (
-    <div class="w-screen h-screen flex flex-row justify-center items-center content-center bg-[#333] flex-wrap overflow-hidden p-2.5 gap-5 box-border">
-      <div class="w-full max-w-[521px] aspect-[521/577] shrink-0 max-h-[60vh]">
+    <div class="w-full min-h-[100dvh] flex flex-col items-center justify-center bg-[#333] p-2 sm:p-5 gap-2 sm:gap-5 box-border overflow-x-hidden">
+      <div class="w-full max-w-[521px] aspect-[521/577] shrink-0">
         <Game />
       </div>
-      <div class="w-full max-w-[521px] h-auto flex flex-col flex-[1_1_300px] overflow-hidden max-h-[35vh]">
+      <div class="w-full max-w-[521px] flex flex-col">
         <UI />
       </div>
     </div>

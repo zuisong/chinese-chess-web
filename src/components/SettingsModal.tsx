@@ -1,5 +1,5 @@
 import { type Component, Show } from "solid-js";
-import type MainScene from "../game/MainScene";
+import type { GameController } from "../store";
 import { locale, setLocale, type Locale } from "../i18n";
 import { animated, showScore, soundEnabled } from "../store";
 
@@ -48,7 +48,7 @@ const translations = {
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  scene: MainScene | null;
+  scene: GameController | null;
 }
 
 const SettingsModal: Component<SettingsModalProps> = (props) => {

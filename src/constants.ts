@@ -27,52 +27,45 @@ export const UI_LINE_HEIGHT = 40;
 export const FONT_SIZE = 20;
 
 // Piece names mapping to image files
+// Piece assets
+import rk from "./assets/images/rk.gif";
+import ra from "./assets/images/ra.gif";
+import rb from "./assets/images/rb.gif";
+import rn from "./assets/images/rn.gif";
+import rr from "./assets/images/rr.gif";
+import rc from "./assets/images/rc.gif";
+import rp from "./assets/images/rp.gif";
+import bk from "./assets/images/bk.gif";
+import ba from "./assets/images/ba.gif";
+import bb from "./assets/images/bb.gif";
+import bn from "./assets/images/bn.gif";
+import br from "./assets/images/br.gif";
+import bc from "./assets/images/bc.gif";
+import bp from "./assets/images/bp.gif";
+import oo from "./assets/images/oo.gif";
+
+// Piece names mapping to image files
 export const PIECE_IMAGE_MAP = {
-  0: "oo", // Empty square
+  0: oo, // Empty square
   // Red Pieces (sdPlayer = 0, pc is 8-14)
-  8: "rk", // Red King
-  9: "ra", // Red Advisor
-  10: "rb", // Red Bishop
-  11: "rn", // Red Knight
-  12: "rr", // Red Rook
-  13: "rc", // Red Cannon
-  14: "rp", // Red Pawn
+  8: rk, // Red King
+  9: ra, // Red Advisor
+  10: rb, // Red Bishop
+  11: rn, // Red Knight
+  12: rr, // Red Rook
+  13: rc, // Red Cannon
+  14: rp, // Red Pawn
 
   // Black Pieces (sdPlayer = 1, pc is 16-22)
-  16: "bk", // Black King
-  17: "ba", // Black Advisor
-  18: "bb", // Black Bishop
-  19: "bn", // Black Knight
-  20: "br", // Black Rook
-  21: "bc", // Black Cannon
-  22: "bp", // Black Pawn
+  16: bk, // Black King
+  17: ba, // Black Advisor
+  18: bb, // Black Bishop
+  19: bn, // Black Knight
+  20: br, // Black Rook
+  21: bc, // Black Cannon
+  22: bp, // Black Pawn
 } as const;
 
 // Engine's internal board representation
 export const FILE_LEFT_ENGINE = 3;
 export const RANK_TOP_ENGINE = 3;
-
-export const COLORS = {
-  light: {
-    background: "#f3f4f6",
-    uiBackground: "#ffffff",
-    text: "#000000",
-    button: "#ffffff",
-    buttonText: "#000000",
-    buttonHover: "#e5e7eb",
-    listBackground: "#ffffff",
-    listText: "#000000",
-    selected: "#3B82F6",
-  },
-  dark: {
-    background: "#111827",
-    uiBackground: "#1F2937",
-    text: "#F9FAFB",
-    button: "#374151",
-    buttonText: "#F9FAFB",
-    buttonHover: "#4B5563",
-    listBackground: "#1F2937",
-    listText: "#F9FAFB",
-    selected: "#60A5FA",
-  },
-};

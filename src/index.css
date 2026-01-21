@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tailwindcss/preflight.css" layer(base);
 
 :root {
   --primary-color: #3b82f6;
@@ -20,21 +21,22 @@
   --spacing-unit: 8px;
 }
 
+html,
 body {
+  height: 100%;
   margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+body {
   font-family: var(--font-family);
   font-size: 16px;
   line-height: 1.6;
   color: var(--text-color-primary);
-  background-color: var(--background-color);
+  background-color: #333;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: calc(var(--spacing-unit) * 2 + env(safe-area-inset-top, 0px))
-    calc(var(--spacing-unit) * 2 + env(safe-area-inset-right, 0px))
-    calc(var(--spacing-unit) * 2 + env(safe-area-inset-bottom, 0px))
-    calc(var(--spacing-unit) * 2 + env(safe-area-inset-left, 0px));
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
 }

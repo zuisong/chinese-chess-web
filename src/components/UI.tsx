@@ -44,7 +44,7 @@ const UI: Component = () => {
   const blackPercent = createMemo(() => 100 - redPercent());
 
   return (
-    <div class="w-full h-full flex flex-col p-2.5 text-white bg-[#444] box-border">
+    <div class="w-full flex flex-col p-2.5 text-white bg-[#444] box-border rounded-b-xl">
       <SettingsModal
         isOpen={isSettingsOpen()}
         onClose={() => setIsSettingsOpen(false)}

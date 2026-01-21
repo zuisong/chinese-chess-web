@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@solidjs/testing-library";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { setGameInstance, setMainScene, setScores, setShowScore } from "../../store";
+import { setMainScene, setScores, setShowScore } from "../../store";
 import UI from "../UI";
 
 // Mock child components

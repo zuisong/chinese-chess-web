@@ -1,5 +1,5 @@
 import { type Component, Show, createEffect, createSignal } from "solid-js";
-import type MainScene from "../game/MainScene";
+import type { GameController } from "../store";
 import { locale } from "../i18n";
 import { difficulty, handicap, moveMode } from "../store";
 import type { Difficulty, Handicap, MoveMode } from "../types/ui.types";
@@ -43,7 +43,7 @@ const translations = {
 interface RestartModalProps {
   isOpen: boolean;
   onClose: () => void;
-  scene: MainScene | null;
+  scene: GameController | null;
 }
 
 const RestartModal: Component<RestartModalProps> = (props) => {
