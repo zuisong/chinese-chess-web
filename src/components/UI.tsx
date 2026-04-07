@@ -44,7 +44,7 @@ const UI: Component = () => {
   const blackPercent = createMemo(() => 100 - redPercent());
 
   return (
-    <div class="w-full flex flex-col p-2.5 text-white bg-[#444] box-border rounded-b-xl">
+    <div class="box-border flex w-full flex-col rounded-b-xl bg-[#444] p-2.5 text-white">
       <SettingsModal
         isOpen={isSettingsOpen()}
         onClose={() => setIsSettingsOpen(false)}
@@ -74,12 +74,12 @@ const UI: Component = () => {
 
       {/* Scores */}
       <Show when={showScore()}>
-        <div class="mb-[15px] bg-[#333] p-2.5 rounded-lg">
-          <div class="flex h-6 rounded-xl overflow-hidden relative bg-[#555]">
+        <div class="mb-[15px] rounded-lg bg-[#333] p-2.5">
+          <div class="relative flex h-6 overflow-hidden rounded-xl bg-[#555]">
             {/* Red Bar */}
             <div
               data-testid="score-bar-red"
-              class="bg-[#FF6B6B] flex items-center justify-start pl-2.5 transition-[width] duration-300 ease-out whitespace-nowrap overflow-hidden"
+              class="flex items-center justify-start overflow-hidden bg-[#FF6B6B] pl-2.5 whitespace-nowrap transition-[width] duration-300 ease-out"
               style={{ width: `${redPercent()}%` }}
             >
               <Show when={redPercent() > 10}>
@@ -89,7 +89,7 @@ const UI: Component = () => {
 
             {/* Black Bar */}
             <div
-              class="bg-[#4ECDC4] flex items-center justify-end pr-2.5 transition-[width] duration-300 ease-out whitespace-nowrap overflow-hidden"
+              class="flex items-center justify-end overflow-hidden bg-[#4ECDC4] pr-2.5 whitespace-nowrap transition-[width] duration-300 ease-out"
               style={{ width: `${blackPercent()}%` }}
             >
               <Show when={blackPercent() > 10}>

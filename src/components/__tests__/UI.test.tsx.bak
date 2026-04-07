@@ -40,7 +40,7 @@ describe("UI Component", () => {
   beforeEach(() => {
     mockScene = createMockScene();
     setMainScene(() => mockScene); // Use function updater for object to avoid interpretation as updater
-    setScores({ red: 500, black: 500 });
+    setScores(() => ({ red: 500, black: 500 }));
     setShowScore(true);
   });
 
@@ -98,7 +98,7 @@ describe("UI Component", () => {
 
   it("分数更新时应该反映变化", async () => {
     render(() => <UI />);
-    setScores({ red: 700, black: 300 });
+    setScores(() => ({ red: 700, black: 300 }));
     const percent70 = await screen.findByText("70%");
     const percent30 = await screen.findByText("30%");
     expect(percent70).toBeInTheDocument();

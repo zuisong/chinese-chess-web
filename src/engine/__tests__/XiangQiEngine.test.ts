@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { XiangQiEngine } from "../index";
-import { createMove, createSquare, unsafeSquare } from "../types";
+import { createMove, createSquare } from "../types";
 import {
   HANDICAP_POSITIONS,
   INITIAL_POSITION,

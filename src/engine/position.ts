@@ -458,8 +458,8 @@ export class Position {
     this.vlWhite = this.vlBlack = 0;
     // 初始化棋子列表
     this.pieceList = [
-      new Array(16).fill(0), // 红方
-      new Array(16).fill(0), // 黑方
+      Array.from({ length: 16 }, () => 0), // 红方
+      Array.from({ length: 16 }, () => 0), // 黑方
     ];
   }
 
@@ -539,22 +539,18 @@ export class Position {
 
       if (bDel) {
         // Remove piece at sq
-        let _found = false;
         for (let i = startIndex; i <= endIndex; i++) {
           if (this.pieceList[side][i] === sq) {
             this.pieceList[side][i] = 0;
-            _found = true;
             break;
           }
         }
         // if (!found) console.warn(`Failed to remove piece ${pc} at ${sq} from side ${side}`);
       } else {
         // Add piece at sq
-        let _found = false;
         for (let i = startIndex; i <= endIndex; i++) {
           if (this.pieceList[side][i] === 0) {
             this.pieceList[side][i] = sq;
-            _found = true;
             break;
           }
         }
@@ -1103,9 +1099,8 @@ export class Position {
   }
 
   repValue(vlRep: number) {
-    const vlReturn =
-      ((vlRep & 2) === 0 ? 0 : this.banValue()) + ((vlRep & 4) === 0 ? 0 : -this.banValue());
-    return vlReturn === 0 ? this.drawValue() : vlReturn;
+    const vlReturn = ((vlRep & 2) === 0 ? 0 : BAN_VALUE) + ((vlRep & 4) === 0 ? 0 : -BAN_VALUE);
+    return vlReturn === 0 ? DRAW_VALUE : vlReturn;
   }
 
   repStatus(recur_: number) {

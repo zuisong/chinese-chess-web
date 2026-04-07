@@ -76,7 +76,7 @@ const SettingsModal: Component<SettingsModalProps> = (props) => {
                 const nextLocale = locales[(currentIndex + 1) % locales.length];
                 setLocale(nextLocale);
               }}
-              class="mt-[5px] w-full p-2.5 rounded-[4px] bg-[#555] text-white border-none text-base cursor-pointer text-left"
+              class="mt-[5px] w-full cursor-pointer rounded-[4px] border-none bg-[#555] p-2.5 text-left text-base text-white"
             >
               {t().languages[locale()]}
             </button>
@@ -118,10 +118,10 @@ const SettingsModal: Component<SettingsModalProps> = (props) => {
             </label>
           </div>
 
-          <div class="flex justify-center mt-2.5">
+          <div class="mt-2.5 flex justify-center">
             <button
               onClick={props.onClose}
-              class="px-[30px] py-2.5 cursor-pointer bg-[#10B981] text-white border-none rounded-[5px] text-base"
+              class="cursor-pointer rounded-[5px] border-none bg-[#10B981] px-[30px] py-2.5 text-base text-white"
             >
               {t().close}
             </button>

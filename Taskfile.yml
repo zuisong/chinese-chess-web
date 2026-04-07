@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: "3"
+
+tasks:
+  default:
+    cmds:
+      - task: check
+      - task: test
+
+  dev:
+    desc: Start frontend development server
+    cmds:
+      - deno task dev
+
+  build:
+    desc: Build the application
+    cmds:
+      - task: fmt
+      - task: check
+      - task: test
+      - deno task build
+
+  test:
+    desc: Run unit tests
+    cmds:
+      - deno task test
+
+  check:
+    desc: Run type check and linter
+    cmds:
+      - deno task check
+      - deno task lint
+
+  fmt:
+    desc: Run formatter (oxfmt)
+    cmds:
+      - deno task fmt
+
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - rm -rf docs node_modules

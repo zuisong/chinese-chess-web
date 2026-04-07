@@ -4,7 +4,7 @@
 import type { XiangQiEngine } from "../engine/index";
 import { SIDE_TAG } from "../engine/position";
 import type { Move, Square } from "../engine/types";
-import { createMove, unsafeSquare } from "../engine/types";
+import { createMove } from "../engine/types";
 import type { Handicap, MoveMode } from "../types/ui.types";
 
 export class GameStateManager {

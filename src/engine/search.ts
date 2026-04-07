@@ -144,14 +144,13 @@ class MoveSort {
   // 获取下一个走法
   next() {
     switch (this.phase) {
+      // @ts-ignore falls through
       case PHASE_HASH:
         this.phase = PHASE_KILLER_1;
         if (this.mvHash > 0) {
           return this.mvHash;
         }
-      // No Break
-
-      // deno-lint-ignore no-fallthrough
+      // @ts-ignore falls through
       case PHASE_KILLER_1:
         this.phase = PHASE_KILLER_2;
         if (
@@ -161,9 +160,7 @@ class MoveSort {
         ) {
           return this.mvKiller1;
         }
-      // No Break
-      // deno-lint-ignore no-fallthrough
-
+      // @ts-ignore falls through
       case PHASE_KILLER_2:
         this.phase = PHASE_GEN_MOVES;
         if (
@@ -173,8 +170,7 @@ class MoveSort {
         ) {
           return this.mvKiller2;
         }
-      // No Break
-      // deno-lint-ignore no-fallthrough
+      // @ts-ignore falls through
       case PHASE_GEN_MOVES: {
         this.phase = PHASE_REST;
         // Generate moves directly into stack?
@@ -195,7 +191,6 @@ class MoveSort {
         this.shellSortStack();
         this.index = 0;
       }
-      // No Break
       default:
         while (this.index < this.end - this.start) {
           const mv = GLOBAL_MOVE_STACK[this.start + this.index];

@@ -1,14 +1,17 @@
 /// <reference types="vitest/config" />
 
-import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
-import solid from "vite-plugin-solid";
+import solidPlugin from "vite-plugin-solid";
+import tailwindcss from "@tailwindcss/vite";
 
-// https://vitejs.dev/config/
 export default defineConfig({
   base: "./",
-  plugins: [solid(), tailwindcss()],
+  plugins: [tailwindcss(), solidPlugin()],
+  server: {
+    port: 3000,
+  },
   build: {
+    target: "es2018",
     outDir: "docs",
   },
   test: {

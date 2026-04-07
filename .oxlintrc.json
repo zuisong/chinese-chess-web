@@ -1,0 +1,34 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": null,
+  "categories": {},
+  "rules": {},
+  "settings": {
+    "jsx-a11y": {
+      "polymorphicPropName": null,
+      "components": {},
+      "attributes": {}
+    },
+    "next": {
+      "rootDir": []
+    },
+    "jsdoc": {
+      "ignorePrivate": false,
+      "ignoreInternal": false,
+      "ignoreReplacesDocs": true,
+      "overrideReplacesDocs": true,
+      "augmentsExtendsReplacesDocs": false,
+      "implementsReplacesDocs": false,
+      "exemptDestructuredRootsFromChecks": false,
+      "tagNamePreference": {}
+    },
+    "vitest": {
+      "typecheck": false
+    }
+  },
+  "env": {
+    "builtin": true
+  },
+  "globals": {},
+  "ignorePatterns": ["docs/"]
+}

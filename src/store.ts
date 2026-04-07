@@ -1,5 +1,4 @@
-import { createSignal } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createSignal, createStore } from "solid-js";
 import type { Difficulty, Handicap, MoveMode } from "./types";
 
 // Game Controller Interface

@@ -157,8 +157,8 @@ describe("StorageManager", () => {
   describe("性能", () => {
     it("应该快速保存和加载大数据", () => {
       const largeState = {
-        moves: new Array(100).fill("move"),
-        data: new Array(100).fill(1),
+        moves: Array.from({ length: 100 }, () => "move"),
+        data: Array.from({ length: 100 }, () => 1),
       } as any;
 
       const saveStart = performance.now();

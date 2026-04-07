@@ -55,13 +55,16 @@ const RestartModal: Component<RestartModalProps> = (props) => {
   const t = () => translations[locale()];
 
   // Update local state when modal opens
-  createEffect(() => {
-    if (props.isOpen) {
-      setLocalMoveMode(moveMode());
-      setLocalHandicap(handicap());
-      setLocalDifficulty(difficulty());
-    }
-  });
+  createEffect(
+    () => props.isOpen,
+    (isOpen) => {
+      if (isOpen) {
+        setLocalMoveMode(moveMode());
+        setLocalHandicap(handicap());
+        setLocalDifficulty(difficulty());
+      }
+    },
+  );
 
   const handleConfirm = () => {
     if (props.scene) {
@@ -88,7 +91,7 @@ const RestartModal: Component<RestartModalProps> = (props) => {
             <label class="font-bold">{t().difficulty}:</label>
             <button
               onClick={() => setLocalDifficulty(((localDifficulty() + 1) % 3) as Difficulty)}
-              class="mt-[5px] w-full p-2.5 rounded-[4px] bg-[#555] text-white border-none text-base cursor-pointer text-left"
+              class="mt-[5px] w-full cursor-pointer rounded-[4px] border-none bg-[#555] p-2.5 text-left text-base text-white"
             >
               {t().difficultyLevels[localDifficulty()]}
             </button>
@@ -98,7 +101,7 @@ const RestartModal: Component<RestartModalProps> = (props) => {
             <label class="font-bold">{t().firstMove}:</label>
             <button
               onClick={() => setLocalMoveMode(((localMoveMode() + 1) % 3) as MoveMode)}
-              class="mt-[5px] w-full p-2.5 rounded-[4px] bg-[#555] text-white border-none text-base cursor-pointer text-left"
+              class="mt-[5px] w-full cursor-pointer rounded-[4px] border-none bg-[#555] p-2.5 text-left text-base text-white"
             >
               {t().firstMoveOptions[localMoveMode()]}
             </button>
@@ -108,22 +111,22 @@ const RestartModal: Component<RestartModalProps> = (props) => {
             <label class="font-bold">{t().handicap}:</label>
             <button
               onClick={() => setLocalHandicap(((localHandicap() + 1) % 4) as Handicap)}
-              class="mt-[5px] w-full p-2.5 rounded-[4px] bg-[#555] text-white border-none text-base cursor-pointer text-left"
+              class="mt-[5px] w-full cursor-pointer rounded-[4px] border-none bg-[#555] p-2.5 text-left text-base text-white"
             >
               {t().handicapOptions[localHandicap()]}
             </button>
           </div>
 
-          <div class="flex justify-between mt-2.5">
+          <div class="mt-2.5 flex justify-between">
             <button
               onClick={props.onClose}
-              class="px-[30px] py-2.5 cursor-pointer text-white border-none rounded-[5px] text-base bg-[#6B7280]"
+              class="cursor-pointer rounded-[5px] border-none bg-[#6B7280] px-[30px] py-2.5 text-base text-white"
             >
               {t().cancel}
             </button>
             <button
               onClick={handleConfirm}
-              class="px-[30px] py-2.5 cursor-pointer text-white border-none rounded-[5px] text-base bg-[#10B981]"
+              class="cursor-pointer rounded-[5px] border-none bg-[#10B981] px-[30px] py-2.5 text-base text-white"
             >
               {t().confirm}
             </button>

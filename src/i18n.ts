@@ -9,6 +9,9 @@ export const [locale, setLocale] = createSignal<Locale>(savedLocale || "zh-CN");
 // Save to localStorage when changed
 // We need to create this effect in a root or it might not track correctly outside component tree?
 // Actually top-level createEffect works in Solid client-side.
-createEffect(() => {
-  localStorage.setItem("locale", locale());
-});
+createEffect(
+  () => locale(),
+  (l) => {
+    document.title = (l === "ja" ? "将棋" : "象棋") + " (Xiangqi)";
+  },
+);
