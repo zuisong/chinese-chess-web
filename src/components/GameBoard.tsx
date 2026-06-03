@@ -22,6 +22,17 @@ import {
   showScore,
   soundEnabled,
   thinking,
+  onlineRoomId,
+  setOnlineRoomId,
+  onlineRole,
+  setOnlineRole,
+  onlineTurn,
+  setOnlineTurn,
+  setOnlineRedConnected,
+  setOnlineBlackConnected,
+  setOnlineToken,
+  setOnlineConnected,
+  setChatMessages,
 } from "../store";
 import { locale } from "../i18n";
 import type { Difficulty } from "../types";
@@ -54,7 +65,7 @@ export default function GameBoard() {
   const [isBusy, setIsBusy] = createSignal(false);
   const [initialFen, setInitialFen] = createSignal("");
 
-  const isFlipped = false;
+  const isFlipped = () => onlineRole() === "black";
 
   // Core instances
   const engine = new XiangQiEngine();
@@ -62,9 +73,101 @@ export default function GameBoard() {
   const soundManager = new SoundManager(true);
   const gameState = new GameStateManager(engine);
 
+  let ws: WebSocket | null = null;
+
+  function connectSocket(roomId: string, token: string) {
+    if (ws) {
+      ws.close();
+    }
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const host = window.location.host;
+    const wsUrl = `${protocol}//${host}/ws/match/${roomId}?token=${token}`;
+
+    ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      setOnlineConnected(true);
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === "init") {
+        setOnlineRoomId(data.room_id);
+        setOnlineRole(data.role);
+        setOnlineToken(data.token);
+        setOnlineTurn(data.turn);
+        setOnlineRedConnected(data.red_connected);
+        setOnlineBlackConnected(data.black_connected);
+
+        // Update URL
+        const url = new URL(window.location.href);
+        url.searchParams.set("room", data.room_id);
+        url.searchParams.set("token", data.token);
+        window.history.replaceState({}, "", url.toString());
+
+        // Load board
+        engine.loadFen(data.fen);
+        createPieces();
+        flushBoard();
+        setScores(() => engine.getScores());
+      } else if (data.type === "state") {
+        setOnlineTurn(data.turn);
+        setOnlineRedConnected(data.red_connected);
+        setOnlineBlackConnected(data.black_connected);
+
+        if (engine.getFen() !== data.fen) {
+          if (data.moves.length > engine.getHistoryLength()) {
+            const lastMoveStr = data.moves[data.moves.length - 1];
+            const mv = engine.ucciMoveToInternal(lastMoveStr);
+            const src = SRC(mv);
+            const dst = DST(mv);
+            animateMove(src, dst).then(() => {
+              engine.loadFen(data.fen);
+              flushBoard();
+              soundManager.playMove();
+              checkGameStateLocal();
+            });
+          } else {
+            engine.loadFen(data.fen);
+            flushBoard();
+            checkGameStateLocal();
+          }
+        }
+      } else if (data.type === "chat") {
+        setChatMessages((prev) => [...prev, { sender: data.sender, message: data.message }]);
+      } else if (data.type === "retract_request") {
+        const sideName = data.sender === "red" ? "红方" : "黑方";
+        const agree = confirm(`对方 (${sideName}) 申请悔棋，您同意吗？`);
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: "response_retract", agree }));
+        }
+      } else if (data.type === "restart_request") {
+        const sideName = data.sender === "red" ? "红方" : "黑方";
+        const agree = confirm(`对方 (${sideName}) 申请重新开始，您同意吗？`);
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: "response_restart", agree }));
+        }
+      } else if (data.type === "info") {
+        setChatMessages((prev) => [...prev, { sender: "system", message: data.message }]);
+      } else if (data.type === "error") {
+        alert(data.message);
+      }
+    };
+
+    ws.onclose = () => {
+      setOnlineConnected(false);
+    };
+  }
+
   // Create the public API object
   const gameController = {
     retract: () => {
+      if (onlineRoomId()) {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: "request_retract" }));
+        }
+        return;
+      }
       if (engine.getHistoryLength() > 1) {
         engine.undoInternalMove();
         if (moveMode() !== 2 && engine.getHistoryLength() > 1) {
@@ -76,6 +179,10 @@ export default function GameBoard() {
       }
     },
     recommend: () => {
+      if (onlineRoomId()) {
+        alert("在线对局不能使用提示");
+        return;
+      }
       if (isBusy()) return;
       if (engine.isMate() || engine.repStatus(3) > 0) return;
 
@@ -122,6 +229,12 @@ export default function GameBoard() {
       saveGame();
     },
     restart: () => {
+      if (onlineRoomId()) {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: "request_restart" }));
+        }
+        return;
+      }
       const fen = STARTUP_FEN[handicap()] || STARTUP_FEN[0];
       setInitialFen(fen);
       engine.loadFen(fen);
@@ -142,12 +255,50 @@ export default function GameBoard() {
     getMoveList: () => {
       return engine.getMoveList().map((m) => {
         const ucci = engine.moveToString(m);
-        return `${ucci.slice(0, 2).toUpperCase()} -${ucci.slice(2, 4).toUpperCase()} `;
+        return `${ucci.slice(0, 2).toUpperCase()}-${ucci.slice(2, 4).toUpperCase()}`;
       });
+    },
+    createOnlineGame: async (side: "red" | "black" = "red") => {
+      try {
+        const res = await fetch(`/api/match/create?side=${side}`, {
+          method: "POST",
+        });
+        const data = await res.json();
+        if (data.room_id) {
+          connectSocket(data.room_id, data.token);
+        }
+      } catch (err) {
+        console.error("Failed to create online game:", err);
+        alert("无法连接服务器以创建对战");
+      }
+    },
+    sendChat: (msg: string) => {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: "chat", message: msg }));
+      }
+    },
+    quitOnlineGame: () => {
+      if (ws) {
+        ws.close();
+        ws = null;
+      }
+      setOnlineRoomId(null);
+      setOnlineRole(null);
+      setOnlineTurn(null);
+      setOnlineToken(null);
+      setOnlineConnected(false);
+      setChatMessages([]);
+
+      const url = new URL(window.location.href);
+      url.searchParams.delete("room");
+      url.searchParams.delete("token");
+      window.history.replaceState({}, "", url.toString());
+      loadGame();
     },
   };
 
   function computerMove() {
+    if (onlineRoomId()) return false;
     let side = 1;
     if (moveMode() === 1) side = 0;
     if (moveMode() === 2) return false;
@@ -159,7 +310,7 @@ export default function GameBoard() {
     for (let i = 0; i < 256; i++) {
       if (IN_BOARD(i)) {
         const pieceType = engine.getPiece(unsafeSquare(i));
-        const pos = CoordinateSystem.getScreenPosition(i, isFlipped, false);
+        const pos = CoordinateSystem.getScreenPosition(i, isFlipped(), false);
         newPieces.push({
           sq: i,
           pieceType,
@@ -169,16 +320,14 @@ export default function GameBoard() {
         });
       }
     }
-    // Replace the entire store with new pieces
     setPieces(() => newPieces);
   }
 
   function flushBoard() {
-    // Solid 2.0 stores are mutable in setters
     setPieces((draft) => {
       for (const p of draft) {
         const pieceType = engine.getPiece(unsafeSquare(p.sq));
-        const pos = CoordinateSystem.getScreenPosition(p.sq, isFlipped, false);
+        const pos = CoordinateSystem.getScreenPosition(p.sq, isFlipped(), false);
         p.pieceType = pieceType;
         p.x = pos.x;
         p.y = pos.y;
@@ -217,10 +366,9 @@ export default function GameBoard() {
       return Promise.resolve();
     }
 
-    const dstPos = CoordinateSystem.getScreenPosition(dst, isFlipped, false);
+    const dstPos = CoordinateSystem.getScreenPosition(dst, isFlipped(), false);
 
     return new Promise<void>((resolve) => {
-      // Mutation based update
       setPieces((draft) => {
         const piece = draft.find((p) => p.sq === src);
         if (piece) {
@@ -230,7 +378,6 @@ export default function GameBoard() {
         }
       });
 
-      // Wait for CSS transition
       setTimeout(() => {
         resolve();
       }, 200);
@@ -243,6 +390,20 @@ export default function GameBoard() {
       clearSelection();
       return;
     }
+
+    if (onlineRoomId()) {
+      if (onlineRole() !== onlineTurn()) {
+        alert("不是你的回合！");
+        clearSelection();
+        return;
+      }
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: "move", src, dst }));
+      }
+      clearSelection();
+      return;
+    }
+
     if (!engine.makeInternalMove(mv)) {
       soundManager.playIllegal();
       return;
@@ -300,6 +461,30 @@ export default function GameBoard() {
     response();
   }
 
+  function checkGameStateLocal() {
+    if (engine.isMate()) {
+      alert("对局结束！");
+      setIsBusy(false);
+      return;
+    }
+    if (engine.repStatus(3) > 0) {
+      soundManager.playDraw();
+      alert("双方不变作和");
+      setIsBusy(false);
+      return;
+    }
+
+    if (engine.inCheck()) {
+      soundManager.playCheck();
+    } else if (engine.captured()) {
+      soundManager.playCapture();
+    } else {
+      soundManager.playMove();
+    }
+
+    setScores(() => engine.getScores());
+  }
+
   function response() {
     if (!computerMove()) {
       setIsBusy(false);
@@ -334,6 +519,7 @@ export default function GameBoard() {
   }
 
   function saveGame() {
+    if (onlineRoomId()) return; // Online games are hosted on server
     const moves = engine
       .getMoveList()
       .filter((m) => (m as number) > 0)
@@ -391,20 +577,24 @@ export default function GameBoard() {
     const target = e.currentTarget as HTMLElement;
     const rect = target.getBoundingClientRect();
 
-    // Use actual bounding box to calculate coordinates relative to the 521x577 plane
     const xPercent = (e.clientX - rect.left) / rect.width;
     const yPercent = (e.clientY - rect.top) / rect.height;
 
     const x = xPercent * BOARD_WIDTH;
     const y = yPercent * BOARD_HEIGHT;
 
-    const sq = CoordinateSystem.getSquareAt(x, y, isFlipped);
+    const sq = CoordinateSystem.getSquareAt(x, y, isFlipped());
     if (sq !== null) {
       clickSquare(unsafeSquare(sq));
     }
   }
 
   function clickSquare(sq: Square) {
+    // If playing online and is not our turn, don't allow selecting pieces belonging to us
+    if (onlineRoomId() && onlineRole() !== onlineTurn()) {
+      return;
+    }
+
     if (gameState.selectPiece(sq)) {
       soundManager.playClick();
       updateSelection();
@@ -420,7 +610,7 @@ export default function GameBoard() {
 
   function getSelectedPosition() {
     if (selectedSquare() === null) return null;
-    return CoordinateSystem.getScreenPosition(selectedSquare()!, isFlipped, false);
+    return CoordinateSystem.getScreenPosition(selectedSquare()!, isFlipped(), false);
   }
 
   createEffect(
@@ -435,7 +625,15 @@ export default function GameBoard() {
     () => {},
     () => {
       setMainScene(() => gameController);
-      loadGame();
+
+      const params = new URLSearchParams(window.location.search);
+      const room = params.get("room");
+      const token = params.get("token") || "";
+      if (room) {
+        connectSocket(room, token);
+      } else {
+        loadGame();
+      }
     },
   );
 
@@ -470,7 +668,7 @@ export default function GameBoard() {
         {/* Valid move markers */}
         <For each={validMoves()}>
           {(dst) => {
-            const pos = CoordinateSystem.getScreenPosition(dst(), isFlipped, true);
+            const pos = CoordinateSystem.getScreenPosition(dst, isFlipped(), true);
             return (
               <div
                 style={{
@@ -494,22 +692,22 @@ export default function GameBoard() {
         {/* Pieces - using For for iterations */}
         <For each={pieces}>
           {(piece) => {
-            const textureKey = () => PIECE_IMAGE_MAP[piece().pieceType];
+            const textureKey = () => PIECE_IMAGE_MAP[piece.pieceType];
             return (
-              <Show when={textureKey() && piece().pieceType !== 0}>
+              <Show when={textureKey() && piece.pieceType !== 0}>
                 <img
-                  data-sq={piece().sq}
+                  data-sq={piece.sq}
                   src={textureKey()}
                   alt="piece"
                   style={{
                     position: "absolute",
-                    left: `${(piece().x / BOARD_WIDTH) * 100}%`,
-                    top: `${(piece().y / BOARD_HEIGHT) * 100}%`,
+                    left: `${(piece.x / BOARD_WIDTH) * 100}%`,
+                    top: `${(piece.y / BOARD_HEIGHT) * 100}%`,
                     width: `${(SQUARE_SIZE / BOARD_WIDTH) * 100}%`,
                     height: `${(SQUARE_SIZE / BOARD_HEIGHT) * 100}%`,
-                    transition: piece().animating ? "left 0.2s linear, top 0.2s linear" : "none",
+                    transition: piece.animating ? "left 0.2s linear, top 0.2s linear" : "none",
                     "pointer-events": "none",
-                    "z-index": piece().animating ? 100 : 10,
+                    "z-index": piece.animating ? 100 : 10,
                   }}
                 />
               </Show>

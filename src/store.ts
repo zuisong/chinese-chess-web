@@ -31,4 +31,17 @@ export const [moveMode, setMoveMode] = createSignal<MoveMode>(0); // 0=Player, 1
 export const [handicap, setHandicap] = createSignal<Handicap>(0); // 0=None, 1=Left Knight, 2=Two Knights, 3=Nine Pieces
 
 // UI State
+// UI State
 export const [thinking, setThinking] = createSignal(false);
+
+// Online PvP State
+export const [onlineRoomId, setOnlineRoomId] = createSignal<string | null>(null);
+export const [onlineRole, setOnlineRole] = createSignal<"red" | "black" | "spectator" | null>(null);
+export const [onlineTurn, setOnlineTurn] = createSignal<"red" | "black" | null>(null);
+export const [onlineRedConnected, setOnlineRedConnected] = createSignal(false);
+export const [onlineBlackConnected, setOnlineBlackConnected] = createSignal(false);
+export const [onlineToken, setOnlineToken] = createSignal<string | null>(null);
+export const [onlineConnected, setOnlineConnected] = createSignal(false);
+export const [chatMessages, setChatMessages] = createSignal<{ sender: string; message: string }[]>(
+  [],
+);

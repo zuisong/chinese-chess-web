@@ -9,31 +9,61 @@ tasks:
       - task: test
 
   dev:
+    desc: Start both frontend and backend development servers concurrently
+    deps: [dev:frontend, dev:backend]
+
+  dev:frontend:
     desc: Start frontend development server
     cmds:
       - deno task dev
 
+  dev:backend:
+    desc: Start Rust backend server
+    dir: backend
+    cmds:
+      - cargo run
+
   build:
-    desc: Build the application
+    desc: Build both frontend and backend
+    deps: [build:frontend, build:backend]
+
+  build:frontend:
+    desc: Build frontend
     cmds:
       - task: fmt
       - task: check
-      - task: test
       - deno task build
 
+  build:backend:
+    desc: Build Rust backend (Release mode)
+    dir: backend
+    cmds:
+      - cargo build --release
+
   test:
-    desc: Run unit tests
+    desc: Run all unit tests (frontend and backend)
+    deps: [test:frontend, test:backend]
+
+  test:frontend:
+    desc: Run frontend unit tests
     cmds:
       - deno task test
 
+  test:backend:
+    desc: Run Rust backend unit tests
+    dir: backend
+    cmds:
+      - cargo test
+
   check:
-    desc: Run type check and linter
+    desc: Run all type checks, linting, and Rust checks
     cmds:
       - deno task check
       - deno task lint
+      - cd backend && cargo check && cargo clippy --all-targets --all-features
 
   fmt:
-    desc: Run formatter (oxfmt)
+    desc: Run formatters (oxfmt)
     cmds:
       - deno task fmt
 
@@ -41,3 +71,4 @@ tasks:
     desc: Clean build artifacts
     cmds:
       - rm -rf docs node_modules
+      - rm -rf backend/target
