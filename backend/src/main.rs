@@ -159,7 +159,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/api/match/create", post(create_room))
-        .route("/ws/match/:room_id", get(ws_handler))
+        .route("/ws/match/{room_id}", get(ws_handler))
         .layer(cors)
         .with_state(lobbies);
 
