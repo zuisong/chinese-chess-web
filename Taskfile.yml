@@ -15,7 +15,7 @@ tasks:
   dev:frontend:
     desc: Start frontend development server
     cmds:
-      - deno task dev
+      - bun run dev
 
   dev:backend:
     desc: Start Rust backend server
@@ -32,7 +32,7 @@ tasks:
     cmds:
       - task: fmt
       - task: check
-      - deno task build
+      - bun run build
 
   build:backend:
     desc: Build Rust backend (Release mode)
@@ -47,7 +47,7 @@ tasks:
   test:frontend:
     desc: Run frontend unit tests
     cmds:
-      - deno task test
+      - bun run test
 
   test:backend:
     desc: Run Rust backend unit tests
@@ -58,14 +58,14 @@ tasks:
   check:
     desc: Run all type checks, linting, and Rust checks
     cmds:
-      - deno task check
-      - deno task lint
+      - bun run check
+      - bun run lint
       - cd backend && cargo check && cargo clippy --all-targets --all-features
 
   fmt:
     desc: Run formatters (oxfmt)
     cmds:
-      - deno task fmt
+      - bun run fmt
 
   clean:
     desc: Clean build artifacts

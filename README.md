@@ -23,6 +23,10 @@
 
 ### 常用命令
 
+- **安装依赖**（[bun](https://bun.sh)）：
+  ```bash
+  bun install
+  ```
 - **启动开发服务器**（前端+后端）：
   ```bash
   task dev

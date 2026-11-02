@@ -1,0 +1,3 @@
+# @solidjs/web 的类型声明 import 了未声明的 csstype，只有扁平 node_modules 才能解析
+[install]
+linker = "hoisted"
