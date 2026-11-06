@@ -1,4 +1,4 @@
-import { createSignal, Show, createStore, createEffect } from "solid-js";
+import { createSignal, Show, createStore, createEffect, createMemo, untrack } from "solid-js";
 import { For } from "@solidjs/web";
 import { BOARD_WIDTH, BOARD_HEIGHT, SQUARE_SIZE, PIECE_IMAGE_MAP } from "../constants";
 import { GameStateManager, SoundManager, StorageManager } from "../core";
@@ -15,7 +15,7 @@ import {
   setHandicap,
   setMainScene,
   setMoveMode,
-  setScores,
+  setEvaluation,
   setShowScore,
   setSoundEnabled,
   setThinking,
@@ -109,7 +109,7 @@ export default function GameBoard() {
         engine.loadFen(data.fen);
         createPieces();
         flushBoard();
-        setScores(() => engine.getScores());
+        setEvaluation(engine.getEvaluation());
       } else if (data.type === "state") {
         setOnlineTurn(data.turn);
         setOnlineRedConnected(data.red_connected);
@@ -174,7 +174,7 @@ export default function GameBoard() {
           engine.undoInternalMove();
         }
         flushBoard();
-        setScores(() => engine.getScores());
+        setEvaluation(engine.getEvaluation());
         saveGame();
       }
     },
@@ -248,10 +248,9 @@ export default function GameBoard() {
       } else {
         checkGameState();
       }
-      setScores(() => engine.getScores());
+      setEvaluation(engine.getEvaluation());
       saveGame();
     },
-    getScores: () => engine.getScores(),
     getMoveList: () => {
       return engine.getMoveList().map((m) => {
         const ucci = engine.moveToString(m);
@@ -420,6 +419,7 @@ export default function GameBoard() {
 
   function checkGameState() {
     if (engine.isMate()) {
+      setEvaluation(engine.getEvaluation());
       const isWin = computerMove();
       if (isWin) {
         soundManager.playWin();
@@ -431,6 +431,7 @@ export default function GameBoard() {
       return;
     }
     if (engine.repStatus(3) > 0) {
+      setEvaluation(engine.getEvaluation());
       soundManager.playDraw();
       alert("双方不变作和");
       setIsBusy(false);
@@ -457,17 +458,19 @@ export default function GameBoard() {
       }
     }
 
-    setScores(() => engine.getScores());
+    setEvaluation(engine.getEvaluation());
     response();
   }
 
   function checkGameStateLocal() {
     if (engine.isMate()) {
+      setEvaluation(engine.getEvaluation());
       alert("对局结束！");
       setIsBusy(false);
       return;
     }
     if (engine.repStatus(3) > 0) {
+      setEvaluation(engine.getEvaluation());
       soundManager.playDraw();
       alert("双方不变作和");
       setIsBusy(false);
@@ -482,7 +485,7 @@ export default function GameBoard() {
       soundManager.playMove();
     }
 
-    setScores(() => engine.getScores());
+    setEvaluation(engine.getEvaluation());
   }
 
   function response() {
@@ -565,7 +568,7 @@ export default function GameBoard() {
       createPieces();
       flushBoard();
       checkGameState();
-      setScores(() => engine.getScores());
+      setEvaluation(engine.getEvaluation());
     } else {
       gameController.restart();
     }
@@ -623,18 +626,19 @@ export default function GameBoard() {
 
   createEffect(
     () => {},
-    () => {
-      setMainScene(() => gameController);
+    () =>
+      untrack(() => {
+        setMainScene(() => gameController);
 
-      const params = new URLSearchParams(window.location.search);
-      const room = params.get("room");
-      const token = params.get("token") || "";
-      if (room) {
-        connectSocket(room, token);
-      } else {
-        loadGame();
-      }
-    },
+        const params = new URLSearchParams(window.location.search);
+        const room = params.get("room");
+        const token = params.get("token") || "";
+        if (room) {
+          connectSocket(room, token);
+        } else {
+          loadGame();
+        }
+      }),
   );
 
   return (
@@ -668,13 +672,15 @@ export default function GameBoard() {
         {/* Valid move markers */}
         <For each={validMoves()}>
           {(dst) => {
-            const pos = CoordinateSystem.getScreenPosition(dst, isFlipped(), true);
+            const pos = createMemo(() =>
+              CoordinateSystem.getScreenPosition(dst, isFlipped(), true),
+            );
             return (
               <div
                 style={{
                   position: "absolute",
-                  left: `${(pos.x / BOARD_WIDTH) * 100}%`,
-                  top: `${(pos.y / BOARD_HEIGHT) * 100}%`,
+                  left: `${(pos().x / BOARD_WIDTH) * 100}%`,
+                  top: `${(pos().y / BOARD_HEIGHT) * 100}%`,
                   width: "3%",
                   height: "auto",
                   "aspect-ratio": "1/1",

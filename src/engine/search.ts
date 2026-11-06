@@ -215,6 +215,7 @@ const HASH_PV = 3;
 export class Search {
   hashMask: number;
   mvResult = 0;
+  score = 0;
   pos: Position;
   allMillis = 0;
   hashTable: { depth: number; flag: number; vl: number; mv: number; zobristLock: number }[] = [];
@@ -501,8 +502,9 @@ export class Search {
     return true;
   }
 
-  searchMain(depth: number, millis: number): number {
-    this.mvResult = this.pos.bookMove();
+  searchMain(depth: number, millis: number, skipBook = false): number {
+    this.score = this.pos.evaluate();
+    this.mvResult = skipBook ? 0 : this.pos.bookMove();
     if (this.mvResult > 0) {
       this.pos.makeMove(this.mvResult);
       if (this.pos.repStatus(3) === 0) {
@@ -529,6 +531,7 @@ export class Search {
     const t = Date.now();
     for (let i = 1; i <= depth; i++) {
       const vl = this.searchRoot(i);
+      this.score = vl;
       this.allMillis = Date.now() - t;
       if (this.allMillis > millis) {
         break;

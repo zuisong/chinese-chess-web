@@ -2,7 +2,7 @@ import { type Component, Show, createMemo, createSignal } from "solid-js";
 import { locale } from "../i18n";
 import {
   mainScene,
-  scores,
+  evaluation,
   showScore,
   onlineRoomId,
   onlineRole,
@@ -12,6 +12,7 @@ import {
   chatMessages,
   onlineConnected,
 } from "../store";
+import { scoreToWinRate } from "../engine/index";
 import RestartModal from "./RestartModal";
 import SettingsModal from "./SettingsModal";
 import ChatModal from "./ChatModal";
@@ -106,10 +107,7 @@ const UI: Component = () => {
   const buttonClass =
     "py-2.5 cursor-pointer bg-[#555] text-white border-none rounded-[5px] text-sm font-bold transition-colors hover:bg-[#666]";
 
-  const redPercent = createMemo(() => {
-    const total = scores.red + scores.black;
-    return total === 0 ? 50 : Math.round((scores.red / total) * 100);
-  });
+  const redPercent = createMemo(() => scoreToWinRate(evaluation()));
 
   const blackPercent = createMemo(() => 100 - redPercent());
 

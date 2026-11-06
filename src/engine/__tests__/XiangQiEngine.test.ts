@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { XiangQiEngine } from "../index";
+import { XiangQiEngine, scoreToWinRate } from "../index";
+import { WIN_VALUE } from "../position";
 import { createMove, createSquare } from "../types";
 import {
   HANDICAP_POSITIONS,
@@ -403,5 +404,57 @@ describe("XiangQiEngine", () => {
       // 红方回合，黑方棋子无法移动
       expect(moves.length).toBe(0);
     });
+  });
+});
+
+describe("局面评估与胜率", () => {
+  it("均势局面的评估分应落在和棋阈值内", () => {
+    const engine = new XiangQiEngine();
+    expect(Math.abs(engine.getEvaluation())).toBeLessThanOrEqual(20);
+  });
+
+  it("红方多双车为正分，黑方多双车为负分", () => {
+    const red = new XiangQiEngine();
+    red.loadFen("1nbakabn1/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1");
+    const black = new XiangQiEngine();
+    black.loadFen("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/1NBAKABN1 w - - 0 1");
+
+    expect(red.getEvaluation()).toBeGreaterThan(100);
+    expect(black.getEvaluation()).toBeLessThan(-100);
+  });
+
+  it("黑方被将死时给出绝杀级分数", () => {
+    const engine = new XiangQiEngine();
+    engine.loadFen("R2k5/3R5/3R5/9/9/9/9/9/9/4K4 b - - 0 1");
+
+    expect(engine.isMate()).toBe(true);
+    expect(engine.getEvaluation()).toBeGreaterThan(WIN_VALUE);
+  });
+
+  it("评估分不随行棋方切换而翻转", () => {
+    const fen = "1nbakabn1/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR";
+    const red = new XiangQiEngine();
+    red.loadFen(`${fen} w - - 0 1`);
+    const black = new XiangQiEngine();
+    black.loadFen(`${fen} b - - 0 1`);
+
+    expect(red.getEvaluation()).toBe(black.getEvaluation());
+  });
+
+  it("子力有偏差的局面不应显示为 50:50", () => {
+    const engine = new XiangQiEngine();
+    engine.loadFen("rnbakab2/9/1c7/p1p1p1p1p/9/9/P1P1c1P1P/1C7/9/RNBAKABN1 w - - 0 1");
+
+    expect(scoreToWinRate(engine.getEvaluation())).toBeLessThan(50);
+  });
+
+  it("胜率随评估分单调增长且两端饱和", () => {
+    expect(scoreToWinRate(0)).toBe(50);
+    expect(scoreToWinRate(10)).toBe(50);
+    expect(scoreToWinRate(52)).toBe(70);
+    expect(scoreToWinRate(-52)).toBe(30);
+    expect(scoreToWinRate(85)).toBeGreaterThan(70);
+    expect(scoreToWinRate(10000)).toBe(100);
+    expect(scoreToWinRate(-10000)).toBe(0);
   });
 });

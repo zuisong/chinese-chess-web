@@ -1,5 +1,5 @@
 // src/engine/index.ts
-import { ASC, DST, Position, SRC } from "./position.ts";
+import { ASC, DST, Position, SRC, WIN_VALUE } from "./position.ts";
 import { Search } from "./search.ts";
 import type { GameScores, GameStatus, Move, PieceType, Side, Square } from "./types";
 import {
@@ -15,6 +15,14 @@ import {
 export type { PieceType, Square, Move, Side, GameScores, GameStatus };
 
 const HASH_LEVEL = 18;
+const WIN_RATE_SCALE = 50;
+const WIN_RATE_DEAD_ZONE = 10;
+
+// 位置分微调、先手加分都在 ±10 内，不该表现为胜率波动
+export function scoreToWinRate(score: number): number {
+  const advantage = Math.sign(score) * Math.max(0, Math.abs(score) - WIN_RATE_DEAD_ZONE);
+  return Math.round(100 / (1 + Math.exp(-advantage / WIN_RATE_SCALE)));
+}
 
 export class XiangQiEngine {
   private _position: Position;
@@ -229,5 +237,15 @@ export class XiangQiEngine {
       red: this._position.vlWhite,
       black: this._position.vlBlack,
     };
+  }
+
+  getEvaluation(): number {
+    // 浅搜索分带随行棋方交替的偏置，只用于终局；常规局面用稳定的局面分差
+    const search = new Search(this._position, 12);
+    search.searchMain(4, 50, true);
+    if (Math.abs(search.score) > WIN_VALUE) {
+      return this._position.sdPlayer === 0 ? search.score : -search.score;
+    }
+    return this.getRedScore();
   }
 }

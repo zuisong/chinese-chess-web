@@ -1,4 +1,4 @@
-import { createSignal, createStore } from "solid-js";
+import { createSignal } from "solid-js";
 import type { Difficulty, Handicap, MoveMode } from "./types";
 
 // Game Controller Interface
@@ -12,7 +12,6 @@ export interface GameController {
   setAnimated: (enabled: boolean) => void;
   setShowScore: (show: boolean) => void;
   restart: () => void;
-  getScores: () => { red: number; black: number };
   getMoveList: () => string[];
 }
 
@@ -20,7 +19,7 @@ export interface GameController {
 export const [mainScene, setMainScene] = createSignal<GameController | null>(null);
 
 // Game State
-export const [scores, setScores] = createStore({ red: 0, black: 0 });
+export const [evaluation, setEvaluation] = createSignal(0);
 export const [showScore, setShowScore] = createSignal(true);
 
 // Settings

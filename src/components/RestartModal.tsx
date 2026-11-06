@@ -1,4 +1,4 @@
-import { type Component, Show, createEffect, createSignal } from "solid-js";
+import { type Component, Show, createEffect, createSignal, untrack } from "solid-js";
 import type { GameController } from "../store";
 import { locale } from "../i18n";
 import { difficulty, handicap, moveMode } from "../store";
@@ -59,9 +59,9 @@ const RestartModal: Component<RestartModalProps> = (props) => {
     () => props.isOpen,
     (isOpen) => {
       if (isOpen) {
-        setLocalMoveMode(moveMode());
-        setLocalHandicap(handicap());
-        setLocalDifficulty(difficulty());
+        setLocalMoveMode(untrack(() => moveMode()));
+        setLocalHandicap(untrack(() => handicap()));
+        setLocalDifficulty(untrack(() => difficulty()));
       }
     },
   );
